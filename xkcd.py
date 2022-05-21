@@ -1,8 +1,9 @@
- import requests
+import requests
 import json
 import tempfile as t
 import os
 import shutil
+import aspose.words as aw
 
 '''**TO WORK**makes a temp directory to store images.  Right now using actual directory--mkdtemp will be true temp'''
 #t.mkdtemp(prefix='images') comment out until figure out temp directory usage
@@ -15,6 +16,14 @@ latest_comic = 'https://xkcd.com/info.0.json'
 temp = requests.get(latest_comic)
 temp_data = temp.json()
 last_comic_number = int(temp_data['num'])
+
+'''**TO WORK** Create a blank document'''
+# create document object
+doc = aw.Document()
+
+# create a document builder object
+builder = aw.DocumentBuilder(doc)
+
 
 #iterate over comics
 for x in range(400, 410):
@@ -36,18 +45,42 @@ for x in range(400, 410):
 
         with open(filename, 'wb')as f:
             f.write(r.content) 
+
+        # add image into document
+        #imageName = "images/" + "409_ElectricSkateboardDoubleComic.png"
+        builder.insert_image(filename)  
+
+        """insert hovertext below image"""
+        # create font
+        font = builder.font
+        font.size = 16
+        font.bold = True
+        font.name = "Arial"
+        #font.underline = aw.Underline.DASH
+
+        # set paragraph formatting
+        paragraphFormat = builder.paragraph_format
+        paragraphFormat.first_line_indent = 8
+        paragraphFormat.alignment = aw.ParagraphAlignment.JUSTIFY
+        paragraphFormat.keep_together = True
+
+        # add text
+        builder.writeln(data['alt'])  
      
-        '''this writes alt text to text file, with line numbered by comic'''
+        '''**NEED TO WORK INTO DOC)this writes alt text to text file, with line numbered by comic'''
         hover_text = data['alt']
         number = data['num']
 
-        with open("images/alt-text.txt", 'a')as f:
+
+        with open("images/alt-text.txt", 'a')as f:  #if printing in book this can be skipped
             f.write(str(number) + ': ' + hover_text + "\n")
             f.write("\n")
-            
-'''**TO WORK** Create a document'''
+      
 
 
-"""**TO WORK iterate over pictures and alt-text and insert into doc; """
+
+
+# save document
+doc.save("out.docx")
 '''deletes directory used to store images during process'''  
 shutil.rmtree('images')
