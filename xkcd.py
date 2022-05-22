@@ -26,6 +26,7 @@ builder = aw.DocumentBuilder(doc)
 
 
 #iterate over comics
+#iterate over comics  **NEED TO CHANGE to cover full range**
 for x in range(400, 410):
     website = 'https://xkcd.com/' + str(x) + '/info.0.json'
     response = requests.get(website)
