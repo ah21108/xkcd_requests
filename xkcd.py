@@ -5,8 +5,9 @@ import os
 # import shutil
 import threading
 import time
+import numpy as np
 # import aspose.words as aw
-
+num_threads = 2
 start = time.time()
 
 def checkComics(numbers):
@@ -35,14 +36,31 @@ list_of_comics = []
 for x in range(last_comic_number):
     list_of_comics.append(x+1)
     
+#set for 2 threads:
+    
+z= len(list_of_comics) 
+bkpts = [int(z//4),int(z//2),int(z * 0.75)]
+   
+list1 = list_of_comics[:(bkpts[0])+1]
+list2 = list_of_comics[(bkpts[0]): (bkpts[1])+1]    
+list3 = list_of_comics[(bkpts[1]): (bkpts[2])+1]
+list4 = list_of_comics[(bkpts[2]):]     
 print(f'Start at {start}')   
 checkComics(list_of_comics)
-# check_comic_thread = threading.Thread(target=checkComics, args=(list_of_comics,))
+# check_comic_thread = threading.Thread(target=checkComics, args=(list1,))
+# check_comic_thread2 = threading.Thread(target=checkComics, args=(list2,))
+# check_comic_thread3 = threading.Thread(target=checkComics, args=(list3,))
+# check_comic_thread4 = threading.Thread(target=checkComics, args=(list4,))
 
 # check_comic_thread.start()
+# check_comic_thread2.start()
+# check_comic_thread3.start()
+# check_comic_thread4.start()
 
 # check_comic_thread.join()
-
+# check_comic_thread2.join()
+# check_comic_thread3.join()
+# check_comic_thread4.join()
 end = time.time()
 
 print(f'DONE. {end-start} seconds. ')
