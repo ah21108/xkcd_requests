@@ -1,87 +1,111 @@
 import requests
 import json
-import tempfile as t
+# import tempfile as t
 import os
-import shutil
-import aspose.words as aw
+# import shutil
+import threading
+import time
+# import aspose.words as aw
 
-'''**TO WORK**makes a temp directory to store images.  Right now using actual directory--mkdtemp will be true temp'''
-#t.mkdtemp(prefix='images') comment out until figure out temp directory usage
+start = time.time()
 
-os.mkdir('images')
+def checkComics(numbers):
+    for number in numbers:
+        website = 'https://xkcd.com/' + str(number) + '/info.0.json'
+        response = requests.get(website)
+        
+        #checks to see if a valid site--gets over the 404 problem
+        if response.status_code == requests.codes.ok:  
+            print(f'{number}: OK')
+            # data = response.json()
+        else: print(f'{number}: FAILED')
+        
+        
+#make directory to store images:
+if not os.path.isdir('images'):
+    os.mkdir('images')
 
 
 '''This determines the latest xkcd cartoon to create the for loop to cover all'''
 latest_comic = 'https://xkcd.com/info.0.json'
 temp = requests.get(latest_comic)
-temp_data = temp.json()
-last_comic_number = int(temp_data['num'])
+# temp_data = temp.json()
+last_comic_number = int(temp.json()['num'])
+list_of_comics = []
+for x in range(last_comic_number):
+    list_of_comics.append(x+1)
+    
+print(f'Start at {start}')   
+checkComics(list_of_comics)
+# check_comic_thread = threading.Thread(target=checkComics, args=(list_of_comics,))
 
-'''**TO WORK** Create a blank document'''
-# create document object
-doc = aw.Document()
+# check_comic_thread.start()
 
-# create a document builder object
-builder = aw.DocumentBuilder(doc)
+# check_comic_thread.join()
 
+end = time.time()
 
-#iterate over comics
-#iterate over comics  **NEED TO CHANGE to cover full range**
-for x in range(400, 410):
-    website = 'https://xkcd.com/' + str(x) + '/info.0.json'
-    response = requests.get(website)
-    if response.status_code == requests.codes.ok:  #checks to see if a valid site--gets over the 404 problem
-
-        data = response.json()
+print(f'DONE. {end-start} seconds. ')
+# #iterate over comics
+# #iterate over comics  **NEED TO CHANGE to cover full range**
+# for x in range(1, last_comic_number+1):
+#     website = 'https://xkcd.com/' + str(x) + '/info.0.json'
+#     response = requests.get(website)
+    
+#     #checks to see if a valid site--gets over the 404 problem
+#     if response.status_code == requests.codes.ok:  
+#         print(f'{x}: OK')
+#         data = response.json()
+#     else: print(f'{x}: FAILED')
         
         #gets rid of special characters title name to prevent save errors
-        alphanumeric = ""
-        for character in data['safe_title']:
-            if character.isalnum():
-                alphanumeric += character
+        # alphanumeric = ""
+        # for character in data['safe_title']:
+        #     if character.isalnum():
+        #         alphanumeric += character
         
-        #saves file
-        filename = 'images/' + str(x) + '_' + alphanumeric +'.png'
-        r = requests.get(data['img'])
+        # #saves file
+        # filename = 'images/' + str(x)  +'.png'
+        # r = requests.get(data['img'])
 
-        with open(filename, 'wb')as f:
-            f.write(r.content) 
+        # with open(filename, 'wb')as f:
+        #     f.write(r.content) 
 
-        # add image into document
-        #imageName = "images/" + "409_ElectricSkateboardDoubleComic.png"
-        builder.insert_image(filename)  
+#         # add image into document
+#         #imageName = "images/" + "409_ElectricSkateboardDoubleComic.png"
+#         builder.insert_image(filename)  
 
-        """insert hovertext below image"""
-        # create font
-        font = builder.font
-        font.size = 16
-        font.bold = True
-        font.name = "Arial"
-        #font.underline = aw.Underline.DASH
+#         """insert hovertext below image"""
+#         # create font
+#         font = builder.font
+#         font.size = 16
+#         font.bold = True
+#         font.name = "Arial"
+#         #font.underline = aw.Underline.DASH
 
-        # set paragraph formatting
-        paragraphFormat = builder.paragraph_format
-        paragraphFormat.first_line_indent = 8
-        paragraphFormat.alignment = aw.ParagraphAlignment.JUSTIFY
-        paragraphFormat.keep_together = True
+#         # set paragraph formatting
+#         paragraphFormat = builder.paragraph_format
+#         paragraphFormat.first_line_indent = 8
+#         paragraphFormat.alignment = aw.ParagraphAlignment.JUSTIFY
+#         paragraphFormat.keep_together = True
 
-        # add text
-        builder.writeln(data['alt'])  
+#         # add text
+#         builder.writeln(data['alt'])  
      
-        '''**NEED TO WORK INTO DOC)this writes alt text to text file, with line numbered by comic'''
-        hover_text = data['alt']
-        number = data['num']
+#         '''**NEED TO WORK INTO DOC)this writes alt text to text file, with line numbered by comic'''
+#         hover_text = data['alt']
+#         number = data['num']
 
 
-        with open("images/alt-text.txt", 'a')as f:  #if printing in book this can be skipped
-            f.write(str(number) + ': ' + hover_text + "\n")
-            f.write("\n")
+#         with open("images/alt-text.txt", 'a')as f:  #if printing in book this can be skipped
+#             f.write(str(number) + ': ' + hover_text + "\n")
+#             f.write("\n")
       
 
 
 
 
-# save document
-doc.save("out.docx")
-'''deletes directory used to store images during process'''  
-shutil.rmtree('images')
+# # save document
+# doc.save("out.docx")
+# '''deletes directory used to store images during process'''  
+# shutil.rmtree('images')
