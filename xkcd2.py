@@ -2,6 +2,7 @@ import requests
 import os
 import time
 import concurrent.futures
+from PIL import Image
 
 
 num_threads = 16
@@ -20,10 +21,14 @@ def checkComics(number):
         r = requests.get(data['img'])
         filename = 'images/' + str(number) +'.png'
         
-        content[str(number)]=[data['safe_title'], data['alt']]
-
         with open(filename, 'wb')as f:
             f.write(r.content)
+        img = Image.open(filename)
+        width = img.width
+        height = img.height
+        
+#'content' is dictionary containing Title, Alt Text, image width, image height        
+        content[str(number)]=[data['safe_title'], data['alt'],width, height]
     else: print(f'{number}: FAILED')
     # return response
         

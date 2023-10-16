@@ -7,7 +7,7 @@ import threading
 import time
 import numpy as np
 # import aspose.words as aw
-num_threads = 2
+num_threads = 8
 start = time.time()
 
 def checkComics(numbers):
@@ -36,17 +36,28 @@ list_of_comics = []
 for x in range(last_comic_number):
     list_of_comics.append(x+1)
     
-#set for 2 threads:
+
     
 z= len(list_of_comics) 
-bkpts = [int(z//4),int(z//2),int(z * 0.75)]
+
+lists = np.array_split(list_of_comics, num_threads)
+
+# bkpts = []
+# for a in range(num_threads):
+#     bkpts.append(int(z * ( (a+1) / num_threads) ) )
+# bkpts = [int(z//4),int(z//2),int(z * 0.75)]
+
+#generate lists
+for thread in range(8):
+    
+    check_comic_thread_ + str(thread) = threading.Thread(target=checkComics, args = lists[thread],) 
    
-list1 = list_of_comics[:(bkpts[0])+1]
-list2 = list_of_comics[(bkpts[0]): (bkpts[1])+1]    
-list3 = list_of_comics[(bkpts[1]): (bkpts[2])+1]
-list4 = list_of_comics[(bkpts[2]):]     
+# list1 = list_of_comics[:(bkpts[0])+1]
+# list2 = list_of_comics[(bkpts[0]): (bkpts[1])+1]    
+# list3 = list_of_comics[(bkpts[1]): (bkpts[2])+1]
+# list4 = list_of_comics[(bkpts[2]):]     
 print(f'Start at {start}')   
-checkComics(list_of_comics)
+# checkComics(list_of_comics)
 # check_comic_thread = threading.Thread(target=checkComics, args=(list1,))
 # check_comic_thread2 = threading.Thread(target=checkComics, args=(list2,))
 # check_comic_thread3 = threading.Thread(target=checkComics, args=(list3,))
