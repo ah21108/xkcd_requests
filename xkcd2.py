@@ -5,7 +5,7 @@ import concurrent.futures
 from PIL import Image
 
 
-num_threads = 16
+num_threads = 8
 start = time.time()
 
 content = {}
@@ -13,7 +13,7 @@ content = {}
 def checkComics(number):
     website = 'https://xkcd.com/' + str(number) + '/info.0.json'
     response = requests.get(website)
-    
+    breakpoint()    
     #checks to see if a valid site--gets over the 404 problem
     if response.status_code == requests.codes.ok:  
         # print(f'{number}: OK')
@@ -28,11 +28,18 @@ def checkComics(number):
         height = img.height
         
 #'content' is dictionary containing Title, Alt Text, image width, image height        
-        content[str(number)]=[data['safe_title'], data['alt'],width, height]
+        content[str(number)] ={'title': data['safe_title'],
+                              'alt_text' : data['alt'],
+                              'img_width': width,
+                              'img_height': height}
     else: print(f'{number}: FAILED')
     # return response
         
         
+def runThread(max_thread, list_to_do):
+    with concurrent.futures.ThreadPoolExecutor(max_workers = max_thread) as executor:  
+        checkSite = {executor.submit(checkComics, comic): comic for comic in list_to_do}
+
 #make directory to store images:
 if not os.path.isdir('images'):
     os.mkdir('images')
@@ -46,10 +53,26 @@ last_comic_number = int(temp.json()['num'])
 list_of_comics = []
 for x in range(last_comic_number):
     list_of_comics.append(x+1)
-    
 
-with concurrent.futures.ThreadPoolExecutor(max_workers = num_threads) as executor:  
-    checkSite = {executor.submit(checkComics, comic): comic for comic in list_of_comics}
+
+#break total list into 8    
+list1 = list_of_comics[:(int(len(list_of_comics)/8))]    
+list2 = list_of_comics[(int(len(list_of_comics)/8)):(int(len(list_of_comics)/4))] 
+list3 = list_of_comics[(int(len(list_of_comics)/4)):(int(len(list_of_comics)/(8/3)))] 
+list4 = list_of_comics[(int(len(list_of_comics)/(8/3))):(int(len(list_of_comics)/2))]  
+list5 = list_of_comics[(int(len(list_of_comics)/2)):(int(len(list_of_comics)/(8/5)))]    
+list6 = list_of_comics[(int(len(list_of_comics)/(8/5))):(int(len(list_of_comics)/(4/3)))] 
+list7 = list_of_comics[(int(len(list_of_comics)/(4/3))):(int(len(list_of_comics)/(8/7)))] 
+list8 = list_of_comics[(int(len(list_of_comics)/(8/7))):]   
+ 
+
+lists = [list1, list2, list3, list4, list5, list6, list7, list8]
+
+with concurrent.futures.ProcessPoolExecutor(max_workers=8) as executor:
+    doComics = {executor.submit(runThread,num_threads,alist): alist for alist in lists}    
+
+# with concurrent.futures.ThreadPoolExecutor(max_workers = num_threads) as executor:  
+#     checkSite = {executor.submit(checkComics, comic): comic for comic in list_of_comics}
 # z= len(list_of_comics) 
 
 # lists = np.array_split(list_of_comics, num_threads)
